@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+{% set active_nav = "members" %}
+{% block content %}
+<div class="space-y-3">
+  <button onclick="window.print()" class="btn btn-primary w-full no-print">🖨️ Imprimer la carte</button>
+
+  <div id="card" class="rounded-2xl p-5 mx-auto" style="max-width:340px; background: var(--primary-dark); color:#fff; border:2px solid var(--accent);">
+    <div class="flex items-center gap-2 mb-3">
+      <img src="{{ url_for('static', filename='logo.jpg') }}" alt="Logo" class="w-9 h-9 rounded-full object-cover flex-shrink-0">
+      <div class="text-xs font-bold leading-tight">{{ org_acronym }}<br><span class="opacity-70 font-normal text-[9px]">Carte de membre</span></div>
+    </div>
+
+    <div class="bg-white rounded-xl p-4 text-center" style="color:var(--ink);">
+      <div class="w-16 h-16 rounded-full mx-auto flex items-center justify-center text-lg font-bold mb-2"
+           style="background:var(--primary-light); color:var(--primary-dark);">
+        {{ member.first_name[0] }}{{ member.last_name[0] }}
+      </div>
+      <div class="font-bold text-base">{{ member.first_name }} {{ member.last_name }}</div>
+      <div class="text-xs mt-0.5" style="color:var(--muted)">{{ member.fonction }}</div>
+      <div class="text-xs mt-2" style="color:var(--muted)">N° {{ member.member_code }}</div>
+      <div class="text-xs" style="color:var(--muted)">Membre depuis {{ member.join_date.strftime('%d/%m/%Y') if member.join_date else '—' }}</div>
+
+      <div class="flex justify-center mt-3">
+        {% if qr_svg %}
+          <div style="width:120px; height:120px;">{{ qr_svg | safe }}</div>
+        {% else %}
+          <div class="flex items-center justify-center text-[10px] rounded-lg" style="width:120px; height:120px; background:#EFEDE4; color:var(--muted);">
+            QR code indisponible
+          </div>
+        {% endif %}
+      </div>
+    </div>
+
+    <div class="text-center text-[9px] mt-3 opacity-70">{{ org_name }}</div>
+  </div>
+
+  <a href="{{ url_for('member_detail', mid=member.id) }}" class="btn btn-ghost w-full no-print">Retour à la fiche</a>
+</div>
+<style>
+  @media print {
+    .no-print, nav { display: none !important; }
+    body { background: #fff; }
+  }
+</style>
+{% endblock %}

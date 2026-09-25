@@ -1,0 +1,75 @@
+{% extends "base.html" %}
+{% set active_nav = "announcements" %}
+{% block content %}
+<div class="space-y-3">
+  {% if perms.manage_announcements %}
+  <button onclick="document.getElementById('addModal').classList.remove('hidden'); document.getElementById('addModal').classList.add('flex');"
+    class="btn btn-primary w-full">+ Nouvelle annonce</button>
+  {% endif %}
+
+  {% if not announcements %}
+    <p class="text-sm text-center py-8" style="color:var(--muted)">Aucune annonce.</p>
+  {% else %}
+    <div class="space-y-2">
+      {% for a in announcements %}
+      <div class="card">
+        <div class="flex justify-between items-start">
+          <div class="font-semibold text-sm flex items-center gap-1.5">{{ a.title }} {% if a.is_demo %}<span class="badge badge-warning">Démo</span>{% endif %}</div>
+          {% if a.status == 'brouillon' %}<span class="badge badge-warning">Brouillon</span>{% endif %}
+        </div>
+        <p class="text-sm mt-1">{{ a.content }}</p>
+        <div class="text-xs mt-2" style="color:var(--muted)">{{ a.date.strftime('%d %b %Y') }} · {{ a.author }}</div>
+        {% if perms.manage_announcements %}
+        <button onclick="editAnnouncement('{{ a.id }}', {{ a.title|tojson }}, {{ a.content|tojson }}, '{{ a.status }}')"
+          class="text-xs font-medium mt-2" style="color:var(--primary)">Modifier</button>
+        {% endif %}
+      </div>
+      {% endfor %}
+    </div>
+  {% endif %}
+</div>
+
+{% if perms.manage_announcements %}
+<div id="addModal" class="fixed inset-0 z-50 hidden items-center justify-center" style="background:rgba(20,25,23,0.45);">
+  <div class="bg-white rounded-2xl p-5 w-full max-w-sm mx-4">
+    <h3 class="font-bold mb-3" id="modalTitle">Nouvelle annonce</h3>
+    <form method="POST" action="{{ url_for('announcement_add') }}" id="annForm" class="space-y-3">
+      <label class="block">
+        <span class="block text-xs font-semibold mb-1" style="color:var(--muted)">Titre</span>
+        <input name="title" id="f_title" required>
+      </label>
+      <label class="block">
+        <span class="block text-xs font-semibold mb-1" style="color:var(--muted)">Contenu</span>
+        <textarea name="content" id="f_content" rows="4" required></textarea>
+      </label>
+      <label class="block">
+        <span class="block text-xs font-semibold mb-1" style="color:var(--muted)">Statut</span>
+        <select name="status" id="f_status">
+          <option value="brouillon">Brouillon</option>
+          <option value="publié">Publié</option>
+        </select>
+      </label>
+      <div class="flex gap-2">
+        <button type="submit" class="btn btn-primary flex-1">Enregistrer</button>
+        <button type="button" onclick="closeModal()" class="btn btn-ghost flex-1">Annuler</button>
+      </div>
+    </form>
+  </div>
+</div>
+<script>
+  function closeModal() {
+    document.getElementById('addModal').classList.add('hidden');
+    document.getElementById('addModal').classList.remove('flex');
+  }
+  function editAnnouncement(id, title, content, status) {
+    document.getElementById('modalTitle').innerText = "Modifier l'annonce";
+    document.getElementById('annForm').action = '/annonces/' + id + '/modifier';
+    document.getElementById('f_title').value = title;
+    document.getElementById('f_content').value = content;
+    document.getElementById('f_status').value = status;
+    document.getElementById('addModal').classList.remove('hidden');
+    document.getElementById('addModal').classList.add('flex');
+  }
+</script>
+{% endif %}
+{% endblock %}

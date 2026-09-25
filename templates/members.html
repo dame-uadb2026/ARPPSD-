@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+{% set active_nav = "members" %}
+{% block content %}
+<div class="space-y-3">
+  <form method="GET" class="flex gap-2">
+    <input type="text" name="q" value="{{ q }}" placeholder="Rechercher un membre…" class="flex-1">
+    {% if perms.manage_members %}
+    <a href="{{ url_for('member_new') }}" class="rounded-xl px-3 flex items-center justify-center" style="background:var(--primary); color:#fff;">+</a>
+    {% endif %}
+  </form>
+
+  <div class="flex gap-2">
+    {% for s, label in [('tous','Tous'), ('actif','Actifs'), ('inactif','Inactifs')] %}
+      <a href="{{ url_for('members', q=q, status=s) }}" class="px-3 py-1.5 rounded-full text-xs font-medium"
+         style="background: {{ 'var(--primary)' if status_filter==s else '#fff' }}; color: {{ '#fff' if status_filter==s else 'var(--muted)' }}; border:1px solid var(--border);">
+        {{ label }}
+      </a>
+    {% endfor %}
+  </div>
+
+  {% if not members %}
+    <div class="text-center py-10">
+      <p class="text-sm" style="color:var(--muted)">Aucun membre trouvé.</p>
+    </div>
+  {% else %}
+    <div class="space-y-2">
+      {% for m in members %}
+      <a href="{{ url_for('member_detail', mid=m.id) }}" class="card flex items-center justify-between !p-3">
+        <div class="flex items-center gap-3">
+          <div class="w-9 h-9 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0" style="background:var(--primary-light); color:var(--primary-dark);">
+            {{ m.first_name[0] }}{{ m.last_name[0] }}
+          </div>
+          <div>
+            <div class="text-sm font-semibold flex items-center gap-1.5">
+              {{ m.first_name }} {{ m.last_name }}
+              {% if m.is_demo %}<span class="badge badge-warning">Démo</span>{% endif %}
+            </div>
+            <div class="text-xs" style="color:var(--muted)">{{ m.fonction }} · {{ m.member_code }}</div>
+          </div>
+        </div>
+        <div class="flex flex-col items-end gap-1">
+          {% if perms.view_finance %}
+            {% set st = statuses[m.id] %}
+            <span class="badge {{ 'badge-success' if st=='à jour' else ('badge-warning' if st=='partiel' else 'badge-danger') }}">
+              {{ 'À jour' if st=='à jour' else ('Partiellement à jour' if st=='partiel' else 'En retard') }}
+            </span>
+          {% endif %}
+          {% if m.status == 'inactif' %}<span class="badge badge-muted">Inactif</span>{% endif %}
+        </div>
+      </a>
+      {% endfor %}
+    </div>
+  {% endif %}
+</div>
+{% endblock %}

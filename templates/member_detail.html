@@ -1,0 +1,71 @@
+{% extends "base.html" %}
+{% set active_nav = "members" %}
+{% block content %}
+<div class="card">
+  <div class="flex items-center gap-3 mb-4">
+    <div class="w-14 h-14 rounded-full flex items-center justify-center text-lg font-bold" style="background:var(--primary-light); color:var(--primary-dark);">
+      {{ member.first_name[0] }}{{ member.last_name[0] }}
+    </div>
+    <div>
+      <div class="font-bold">{{ member.first_name }} {{ member.last_name }}</div>
+      <div class="text-xs" style="color:var(--muted)">{{ member.fonction }}</div>
+      {% if member.is_demo %}<span class="badge badge-warning mt-1">Démo</span>{% endif %}
+    </div>
+  </div>
+
+  <div class="space-y-2 text-sm mb-4">
+    <div>Téléphone : {{ member.phone or '—' }}</div>
+    <div>Adresse : {{ member.address or '—' }}</div>
+    <div>N° {{ member.member_code }} · Adhésion {{ member.join_date.strftime('%d %b %Y') if member.join_date else '—' }}</div>
+  </div>
+
+  {% if perms.view_finance %}
+  <div class="mb-4">
+    <div class="text-xs font-semibold mb-2" style="color:var(--muted)">HISTORIQUE DE COTISATION</div>
+    <div class="mb-2"><span class="badge {{ 'badge-success' if status=='à jour' else ('badge-warning' if status=='partiel' else 'badge-danger') }}">
+      {{ 'À jour' if status=='à jour' else ('Partiellement à jour' if status=='partiel' else 'En retard') }}
+    </span></div>
+    {% if not contribs %}
+      <p class="text-xs" style="color:var(--muted)">Aucun paiement enregistré.</p>
+    {% else %}
+      {% for c in contribs %}
+      <div class="flex justify-between text-sm py-0.5">
+        <span>{{ MONTHS_FR[c.month-1] }} {{ c.year }}</span>
+        <span class="font-medium">{{ "{:,}".format(c.amount).replace(",", " ") }} FCFA</span>
+      </div>
+      {% endfor %}
+    {% endif %}
+  </div>
+  {% endif %}
+
+  {% if member.notes %}
+  <div class="mb-4">
+    <div class="text-xs font-semibold mb-1" style="color:var(--muted)">OBSERVATIONS</div>
+    <p class="text-sm">{{ member.notes }}</p>
+  </div>
+  {% endif %}
+
+  {% if perms.manage_members %}
+  <div class="flex gap-2">
+    <a href="{{ url_for('member_edit', mid=member.id) }}" class="btn btn-ghost flex-1">Modifier</a>
+    <form method="POST" action="{{ url_for('member_toggle_status', mid=member.id) }}" class="flex-1">
+      <button type="submit" class="btn w-full" style="background: {{ 'var(--danger)' if member.status=='actif' else 'var(--primary)' }}; color:#fff;">
+        {{ 'Désactiver' if member.status == 'actif' else 'Réactiver' }}
+      </button>
+    </form>
+  </div>
+  {% endif %}
+
+  <a href="{{ url_for('member_card', mid=member.id) }}" class="btn btn-accent w-full mt-2">Carte de membre (QR code)</a>
+
+  {% if perms.manage_members %}
+  <div class="mt-4 pt-4" style="border-top:1px solid var(--border);">
+    <div class="text-xs font-semibold mb-2" style="color:var(--muted)">RÉINITIALISER LE MOT DE PASSE</div>
+    <form method="POST" action="{{ url_for('member_reset_password', mid=member.id) }}" class="flex gap-2">
+      <input type="password" name="new_password" placeholder="Nouveau mot de passe" minlength="4" required class="flex-1">
+      <button type="submit" class="btn btn-accent">Définir</button>
+    </form>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

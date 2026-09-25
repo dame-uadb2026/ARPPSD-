@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{{ org_acronym }} · Connexion</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body style="background:#0D4A40;" class="min-h-screen flex items-center justify-center px-6 py-10">
+  <div class="max-w-sm w-full">
+    <div class="flex flex-col items-center mb-8">
+      <img src="{{ url_for('static', filename='logo.jpg') }}" alt="Logo {{ org_acronym }}"
+           class="w-24 h-24 rounded-full object-cover mb-4 shadow-lg">
+      <h1 class="text-white text-base font-bold text-center leading-snug px-2">{{ org_name }}</h1>
+      <p class="text-white text-xs opacity-70 text-center mt-1 leading-snug">{{ org_acronym }}</p>
+    </div>
+
+    <div class="rounded-2xl p-5 bg-white">
+      {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+          {% for category, msg in messages %}
+            <div class="mb-3 px-3 py-2 rounded-lg text-sm" style="background:#F7E9E6; color:#B14A3D;">{{ msg }}</div>
+          {% endfor %}
+        {% endif %}
+      {% endwith %}
+      <form method="POST">
+        <label class="block mb-3">
+          <span class="block text-xs font-semibold mb-1 text-gray-500">Votre nom</span>
+          <select name="member_id" required class="w-full px-3 py-2.5 rounded-lg border border-gray-200 text-sm">
+            <option value="" disabled selected>Choisissez votre nom…</option>
+            {% for m in members %}
+              <option value="{{ m.id }}">{{ m.first_name }} {{ m.last_name }} — {{ m.fonction }}</option>
+            {% endfor %}
+          </select>
+        </label>
+        <label class="block mb-4">
+          <span class="block text-xs font-semibold mb-1 text-gray-500">Mot de passe</span>
+          <input type="password" name="password" required
+                 class="w-full px-3 py-2.5 rounded-lg border border-gray-200 text-sm">
+        </label>
+        <button type="submit" class="w-full py-2.5 rounded-lg font-semibold text-sm text-white" style="background:#146356;">
+          Se connecter
+        </button>
+      </form>
+      <div class="flex items-start gap-2 mt-4 p-3 rounded-lg" style="background:#F5EEDA;">
+        <p class="text-[11px] leading-snug" style="color:#B08628;">
+          Votre nom n'apparaît pas dans la liste, ou vous avez oublié votre mot de passe ? Demandez à l'administrateur de vous créer un compte ou de le réinitialiser.
+        </p>
+      </div>
+      <p class="text-center text-[10px] mt-4" style="color:#9CA39C;">Application conçue par Dame Diop, étudiant en MPI</p>
+    </div>
+  </div>
+</body>
+</html>

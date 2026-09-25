@@ -1,0 +1,122 @@
+{% extends "base.html" %}
+{% set active_nav = "dashboard" %}
+{% block content %}
+<div class="space-y-4">
+  {% if diagnostics %}
+  <div class="space-y-2">
+    {% for issue in diagnostics %}
+    <div class="rounded-xl p-3" style="background:#FCEEEC; border:1px solid var(--danger);">
+      <div class="text-xs font-bold" style="color:var(--danger)">⚠️ {{ issue.title }}</div>
+      <p class="text-[11px] mt-1 leading-snug" style="color:var(--ink)">{{ issue.detail }}</p>
+    </div>
+    {% endfor %}
+  </div>
+  {% endif %}
+
+  <div class="grid grid-cols-2 gap-3">
+    <div class="card">
+      <div class="text-2xl font-bold">{{ active_count }}</div>
+      <div class="text-xs mt-1" style="color:var(--muted)">Membres actifs</div>
+    </div>
+    <div class="card">
+      <div class="text-2xl font-bold" style="color:var(--success)">{{ up_to_date }}</div>
+      <div class="text-xs mt-1" style="color:var(--muted)">Membres à jour</div>
+    </div>
+    {% if perms.view_finance %}
+    <div class="card">
+      <div class="text-2xl font-bold" style="color:var(--danger)">{{ late }}</div>
+      <div class="text-xs mt-1" style="color:var(--muted)">Membres en retard</div>
+    </div>
+    <div class="card">
+      <div class="text-2xl font-bold" style="color:var(--primary)">{{ "{:,}".format(solde).replace(",", " ") }} FCFA</div>
+      <div class="text-xs mt-1" style="color:var(--muted)">Solde caisse sociale</div>
+    </div>
+    {% endif %}
+  </div>
+
+  {% if perms.view_finance %}
+  <div class="card">
+    <div class="text-xs font-semibold mb-2" style="color:var(--muted)">COTISATIONS</div>
+    <div class="flex justify-between text-sm"><span>Ce mois-ci ({{ month_label }})</span><span class="font-semibold">{{ "{:,}".format(month_total).replace(",", " ") }} FCFA</span></div>
+    <div class="flex justify-between text-sm mt-1"><span>Cumul annuel {{ year }}</span><span class="font-semibold">{{ "{:,}".format(annual_total).replace(",", " ") }} FCFA</span></div>
+  </div>
+  {% endif %}
+
+  <div class="card">
+    <div class="flex items-center justify-between mb-1">
+      <span class="text-xs font-semibold" style="color:var(--muted)">PROCHAINES ACTIVITÉS</span>
+      <a href="{{ url_for('activities') }}" class="text-xs font-medium" style="color:var(--primary)">Voir tout</a>
+    </div>
+    {% if not upcoming %}
+      <p class="text-sm py-2" style="color:var(--muted)">Aucune activité à venir.</p>
+    {% else %}
+      {% for a in upcoming %}
+      <a href="{{ url_for('activity_detail', aid=a.id) }}" class="flex justify-between items-center py-2" style="border-bottom:1px solid var(--border)">
+        <div>
+          <div class="text-sm font-medium">{{ a.title }}</div>
+          <div class="text-xs" style="color:var(--muted)">{{ a.date.strftime('%d %b %Y') }} · {{ a.location }}</div>
+        </div>
+      </a>
+      {% endfor %}
+    {% endif %}
+  </div>
+
+  {% if perms.view_finance %}
+  <div class="card">
+    <div class="flex items-center justify-between mb-1">
+      <span class="text-xs font-semibold" style="color:var(--muted)">DERNIÈRES OPÉRATIONS CAISSE</span>
+      <a href="{{ url_for('caisse') }}" class="text-xs font-medium" style="color:var(--primary)">Voir tout</a>
+    </div>
+    {% if not recent_caisse %}
+      <p class="text-sm py-2" style="color:var(--muted)">Aucune opération.</p>
+    {% else %}
+      {% for c in recent_caisse %}
+      <div class="flex justify-between items-center py-2" style="border-bottom:1px solid var(--border)">
+        <div>
+          <div class="text-sm font-medium">{{ c.motif }}</div>
+          <div class="text-xs" style="color:var(--muted)">{{ c.date.strftime('%d %b %Y') }}</div>
+        </div>
+        <span class="text-sm font-semibold" style="color: {{ 'var(--success)' if c.type=='entrée' else 'var(--danger)' }}">
+          {{ '+' if c.type=='entrée' else '−' }}{{ "{:,}".format(c.amount).replace(",", " ") }} FCFA
+        </span>
+      </div>
+      {% endfor %}
+    {% endif %}
+  </div>
+  {% endif %}
+
+  <div class="card">
+    <div class="flex items-center justify-between mb-1">
+      <span class="text-xs font-semibold" style="color:var(--muted)">DERNIÈRES ANNONCES</span>
+      <a href="{{ url_for('announcements') }}" class="text-xs font-medium" style="color:var(--primary)">Voir tout</a>
+    </div>
+    {% if not recent_announcements %}
+      <p class="text-sm py-2" style="color:var(--muted)">Aucune annonce.</p>
+    {% else %}
+      {% for a in recent_announcements %}
+      <div class="py-2" style="border-bottom:1px solid var(--border)">
+        <div class="text-sm font-medium">{{ a.title }}</div>
+        <div class="text-xs" style="color:var(--muted)">{{ a.date.strftime('%d %b %Y') }}</div>
+      </div>
+      {% endfor %}
+    {% endif %}
+  </div>
+
+  <div class="card">
+    <div class="flex items-center justify-between mb-1">
+      <span class="text-xs font-semibold" style="color:var(--muted)">DERNIERS DOCUMENTS</span>
+      <a href="{{ url_for('documents') }}" class="text-xs font-medium" style="color:var(--primary)">Voir tout</a>
+    </div>
+    {% if not recent_docs %}
+      <p class="text-sm py-2" style="color:var(--muted)">Aucun document.</p>
+    {% else %}
+      {% for d in recent_docs %}
+      <div class="flex justify-between items-center py-2" style="border-bottom:1px solid var(--border)">
+        <div class="text-sm font-medium">{{ d.name }}</div>
+        <span class="badge badge-primary">{{ d.category }}</span>
+      </div>
+      {% endfor %}
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

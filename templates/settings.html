@@ -1,0 +1,106 @@
+{% extends "base.html" %}
+{% set active_nav = "settings" %}
+{% block content %}
+<div class="space-y-3">
+  <div class="flex gap-2 overflow-x-auto">
+    {% for t, label in [('general','Général'), ('roles','Rôles & permissions'), ('audit','Journal')] %}
+    <a href="{{ url_for('settings_view', tab=t) }}" class="px-3 py-1.5 rounded-full text-xs font-medium flex-shrink-0"
+       style="background: {{ 'var(--primary)' if tab==t else '#fff' }}; color: {{ '#fff' if tab==t else 'var(--muted)' }}; border:1px solid var(--border);">{{ label }}</a>
+    {% endfor %}
+  </div>
+
+  {% if tab == 'general' %}
+    {% if perms.manage_users %}
+    <div class="card">
+      <form method="POST" class="space-y-3">
+        <label class="block">
+          <span class="block text-xs font-semibold mb-1" style="color:var(--muted)">Nom de l'association</span>
+          <input name="org_name" value="{{ org_name }}">
+        </label>
+        <label class="block">
+          <span class="block text-xs font-semibold mb-1" style="color:var(--muted)">Sigle</span>
+          <input name="org_acronym" value="{{ org_acronym }}">
+        </label>
+        <label class="block">
+          <span class="block text-xs font-semibold mb-1" style="color:var(--muted)">Cotisation mensuelle (FCFA)</span>
+          <input type="number" name="monthly_fee" value="{{ monthly_fee }}">
+        </label>
+        <label class="block">
+          <span class="block text-xs font-semibold mb-1" style="color:var(--muted)">Cotisation annuelle (FCFA)</span>
+          <input type="number" name="annual_fee" value="{{ annual_fee }}">
+        </label>
+        <button type="submit" class="btn btn-primary w-full">Enregistrer</button>
+      </form>
+      <div class="mt-4 pt-4" style="border-top:1px solid var(--border);">
+        <p class="text-xs mb-2" style="color:var(--muted)">Téléchargez une sauvegarde complète (base de données + documents) à conserver sur votre PC ou Google Drive.</p>
+        <a href="{{ url_for('backup_download') }}" class="btn btn-accent w-full">Télécharger une sauvegarde</a>
+      </div>
+      <div class="mt-4 pt-4" style="border-top:1px solid var(--border);">
+        <p class="text-xs mb-2" style="color:var(--muted)">Envoyer directement une sauvegarde complète (membres, cotisations, caisse, documents) vers votre Google Drive, sans passer par votre PC.</p>
+        <form method="POST" action="{{ url_for('backup_to_drive') }}">
+          <button type="submit" class="btn w-full" style="background:#1a73e8; color:#fff;">📤 Sauvegarder sur Google Drive</button>
+        </form>
+      </div>
+      <div class="mt-4 pt-4" style="border-top:1px solid var(--border);">
+        <p class="text-xs mb-2" style="color:var(--muted)">Restaurer une sauvegarde précédente (fichier .zip téléchargé plus tôt). <strong>Attention :</strong> ceci remplace toutes les données actuelles (membres, cotisations, caisse, documents) par celles du fichier importé. Vous devrez vous reconnecter après.</p>
+        <form method="POST" action="{{ url_for('restore_backup') }}" enctype="multipart/form-data"
+              onsubmit="return confirm('Ceci va remplacer TOUTES les données actuelles par celles du fichier importé. Continuer ?');">
+          <input type="file" name="backup_file" accept=".zip" required class="mb-2">
+          <button type="submit" class="btn w-full" style="background:var(--danger); color:#fff;">Restaurer cette sauvegarde</button>
+        </form>
+      </div>
+      <div class="mt-4 pt-4" style="border-top:1px solid var(--border);">
+        <p class="text-xs mb-2" style="color:var(--muted)">Réinitialiser toutes les données vers les valeurs de démonstration.</p>
+        <form method="POST" action="{{ url_for('reset_demo') }}" onsubmit="return confirm('Réinitialiser toutes les données ? Cette action supprime les données actuelles.');">
+          <button type="submit" class="btn btn-danger w-full">Réinitialiser les données de démo</button>
+        </form>
+      </div>
+    </div>
+    {% else %}
+      <p class="text-sm text-center py-8" style="color:var(--muted)">Accès réservé à l'administration.</p>
+    {% endif %}
+  {% endif %}
+
+  {% if tab == 'roles' %}
+    {% if perms.manage_users %}
+      <p class="text-xs" style="color:var(--muted)">Cochez les permissions accordées à chaque fonction.</p>
+      {% for role in roles %}
+      <div class="card">
+        <div class="font-semibold text-sm mb-2">{{ role }}</div>
+        <div class="space-y-1.5">
+          {% for k in perm_keys %}
+          <form method="POST" action="{{ url_for('settings_permissions') }}" class="flex items-center gap-2 text-sm">
+            <input type="hidden" name="role" value="{{ role }}">
+            <input type="hidden" name="key" value="{{ k }}">
+            <input type="checkbox" onchange="this.form.submit()" {% if permissions.get(role, {}).get(k) %}checked{% endif %}>
+            <span>{{ perm_labels[k] }}</span>
+          </form>
+          {% endfor %}
+        </div>
+      </div>
+      {% endfor %}
+    {% else %}
+      <p class="text-sm text-center py-8" style="color:var(--muted)">Accès réservé à l'administration.</p>
+    {% endif %}
+  {% endif %}
+
+  {% if tab == 'audit' %}
+    {% if perms.view_audit_log %}
+      <div class="card">
+        <div class="font-bold text-sm mb-2">Journal d'activité</div>
+        <div class="space-y-2">
+          {% for l in logs %}
+          <div class="text-xs py-1.5" style="border-bottom:1px solid var(--border);">
+            <div class="font-medium">{{ l.action }}</div>
+            <div style="color:var(--muted)">{{ l.user }} · {{ l.timestamp.strftime('%d %b %Y %H:%M') }}</div>
+            {% if l.details %}<div style="color:var(--muted)">{{ l.details }}</div>{% endif %}
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+    {% else %}
+      <p class="text-sm text-center py-8" style="color:var(--muted)">Accès réservé.</p>
+    {% endif %}
+  {% endif %}
+</div>
+{% endblock %}

@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="space-y-3">
+  <div class="flex items-center justify-between">
+    <h2 class="font-bold text-sm">Notifications</h2>
+    {% if notifications %}
+    <form method="POST" action="{{ url_for('notifications_mark_all_read') }}">
+      <button type="submit" class="text-xs font-semibold" style="color:var(--primary)">Tout marquer comme lu</button>
+    </form>
+    {% endif %}
+  </div>
+
+  {% if not notifications %}
+    <p class="text-sm text-center py-8" style="color:var(--muted)">Aucune notification pour le moment.</p>
+  {% else %}
+    <div class="space-y-2">
+      {% for n in notifications %}
+      <div class="card !p-3" style="{{ '' if n.is_read else 'border-color:var(--primary);' }}">
+        <div class="flex items-start justify-between gap-2">
+          <div class="min-w-0">
+            <div class="text-sm font-semibold flex items-center gap-1.5">
+              {% if not n.is_read %}<span class="w-1.5 h-1.5 rounded-full flex-shrink-0" style="background:var(--primary);"></span>{% endif %}
+              {{ n.title }}
+            </div>
+            {% if n.message %}<p class="text-xs mt-1" style="color:var(--muted)">{{ n.message }}</p>{% endif %}
+            <div class="text-[10px] mt-1" style="color:var(--muted)">{{ n.created_at.strftime('%d/%m/%Y %H:%M') if n.created_at else '' }}</div>
+          </div>
+          {% if not n.is_read %}
+          <form method="POST" action="{{ url_for('notification_read', nid=n.id) }}">
+            <input type="hidden" name="next" value="{{ n.link or url_for('notifications') }}">
+            <button type="submit" class="text-xs font-semibold flex-shrink-0" style="color:var(--primary)">Lu</button>
+          </form>
+          {% elif n.link %}
+          <a href="{{ n.link }}" class="text-xs font-semibold flex-shrink-0" style="color:var(--primary)">Voir</a>
+          {% endif %}
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  {% endif %}
+</div>
+{% endblock %}

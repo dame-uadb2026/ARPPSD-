@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+{% set active_nav = "reports" %}
+{% block content %}
+<div class="space-y-3">
+  <div class="flex items-start gap-2 p-3 rounded-xl" style="background:var(--accent-light);">
+    <p class="text-[11px] leading-snug" style="color:var(--accent);">
+      Téléchargez un PDF prêt à imprimer en un clic.
+    </p>
+  </div>
+
+  <a href="{{ url_for('report_pdf') }}" class="btn btn-primary w-full">Télécharger le rapport en PDF</a>
+
+
+  <div class="card">
+    <div class="font-bold text-sm mb-2">Rapport membres</div>
+    <div class="flex justify-between text-sm py-1.5" style="border-bottom:1px solid var(--border)"><span style="color:var(--muted)">Membres actifs</span><span class="font-semibold">{{ active_count }}</span></div>
+    <div class="flex justify-between text-sm py-1.5" style="border-bottom:1px solid var(--border)"><span style="color:var(--muted)">Membres à jour</span><span class="font-semibold">{{ up_to_date }}</span></div>
+    <div class="flex justify-between text-sm py-1.5" style="border-bottom:1px solid var(--border)"><span style="color:var(--muted)">Partiellement à jour</span><span class="font-semibold">{{ partial }}</span></div>
+    <div class="flex justify-between text-sm py-1.5"><span style="color:var(--muted)">En retard</span><span class="font-semibold">{{ late }}</span></div>
+  </div>
+
+  <div class="card">
+    <div class="font-bold text-sm mb-2">Rapport cotisations & caisse sociale</div>
+    <div class="flex justify-between text-sm py-1.5" style="border-bottom:1px solid var(--border)"><span style="color:var(--muted)">Cotisations perçues {{ year }}</span><span class="font-semibold">{{ "{:,}".format(annual_contribs).replace(",", " ") }} FCFA</span></div>
+    <div class="flex justify-between text-sm py-1.5" style="border-bottom:1px solid var(--border)"><span style="color:var(--muted)">Solde caisse sociale</span><span class="font-semibold">{{ "{:,}".format(solde).replace(",", " ") }} FCFA</span></div>
+    <div class="flex justify-between text-sm py-1.5" style="border-bottom:1px solid var(--border)"><span style="color:var(--muted)">Total entrées</span><span class="font-semibold">{{ "{:,}".format(total_in).replace(",", " ") }} FCFA</span></div>
+    <div class="flex justify-between text-sm py-1.5"><span style="color:var(--muted)">Total sorties</span><span class="font-semibold">{{ "{:,}".format(total_out).replace(",", " ") }} FCFA</span></div>
+  </div>
+
+  <div class="card">
+    <div class="font-bold text-sm mb-2">Rapport activités</div>
+    <div class="flex justify-between text-sm py-1.5" style="border-bottom:1px solid var(--border)"><span style="color:var(--muted)">Total activités</span><span class="font-semibold">{{ total_activities }}</span></div>
+    <div class="flex justify-between text-sm py-1.5" style="border-bottom:1px solid var(--border)"><span style="color:var(--muted)">Réalisées</span><span class="font-semibold">{{ realized }}</span></div>
+    <div class="flex justify-between text-sm py-1.5"><span style="color:var(--muted)">À venir</span><span class="font-semibold">{{ upcoming }}</span></div>
+  </div>
+</div>
+{% endblock %}

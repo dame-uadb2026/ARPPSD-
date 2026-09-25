@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% set active_nav = "" %}
+{% block content %}
+<div class="card">
+  <h2 class="font-bold text-base mb-1">Mon compte</h2>
+  <p class="text-xs mb-4" style="color:var(--muted)">{{ current_user.name }} · {{ current_user.role }}</p>
+  <form method="POST" class="space-y-3">
+    <label class="block">
+      <span class="block text-xs font-semibold mb-1" style="color:var(--muted)">Mot de passe actuel</span>
+      <input type="password" name="current_password" required>
+    </label>
+    <label class="block">
+      <span class="block text-xs font-semibold mb-1" style="color:var(--muted)">Nouveau mot de passe</span>
+      <input type="password" name="new_password" minlength="4" required>
+    </label>
+    <label class="block">
+      <span class="block text-xs font-semibold mb-1" style="color:var(--muted)">Confirmer le nouveau mot de passe</span>
+      <input type="password" name="confirm_password" minlength="4" required>
+    </label>
+    <button type="submit" class="btn btn-primary w-full">Mettre à jour</button>
+  </form>
+</div>
+{% endblock %}

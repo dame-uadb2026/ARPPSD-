@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="space-y-3">
+  <form method="GET" action="{{ url_for('search') }}">
+    <input name="q" value="{{ q }}" placeholder="Rechercher un membre, document, activité, annonce…" autofocus>
+  </form>
+
+  {% if q and q|length < 2 %}
+    <p class="text-sm text-center py-8" style="color:var(--muted)">Tapez au moins 2 caractères.</p>
+  {% elif q and total == 0 %}
+    <p class="text-sm text-center py-8" style="color:var(--muted)">Aucun résultat pour « {{ q }} ».</p>
+  {% elif q %}
+    {% if results.members %}
+    <div class="card !p-3">
+      <div class="text-xs font-semibold mb-2" style="color:var(--muted)">MEMBRES</div>
+      {% for m in results.members %}
+      <a href="{{ url_for('member_detail', mid=m.id) }}" class="block py-1.5 text-sm" style="border-bottom:1px solid var(--border);">
+        {{ m.first_name }} {{ m.last_name }} <span style="color:var(--muted)">· {{ m.fonction }}</span>
+      </a>
+      {% endfor %}
+    </div>
+    {% endif %}
+
+    {% if results.activities %}
+    <div class="card !p-3">
+      <div class="text-xs font-semibold mb-2" style="color:var(--muted)">ACTIVITÉS</div>
+      {% for a in results.activities %}
+      <a href="{{ url_for('activity_detail', aid=a.id) }}" class="block py-1.5 text-sm" style="border-bottom:1px solid var(--border);">
+        {{ a.title }} <span style="color:var(--muted)">· {{ a.date.strftime('%d/%m/%Y') if a.date else '' }}</span>
+      </a>
+      {% endfor %}
+    </div>
+    {% endif %}
+
+    {% if results.announcements %}
+    <div class="card !p-3">
+      <div class="text-xs font-semibold mb-2" style="color:var(--muted)">ANNONCES</div>
+      {% for a in results.announcements %}
+      <a href="{{ url_for('announcements') }}" class="block py-1.5 text-sm" style="border-bottom:1px solid var(--border);">
+        {{ a.title }}
+      </a>
+      {% endfor %}
+    </div>
+    {% endif %}
+
+    {% if results.documents %}
+    <div class="card !p-3">
+      <div class="text-xs font-semibold mb-2" style="color:var(--muted)">DOCUMENTS</div>
+      {% for d in results.documents %}
+      <a href="{{ url_for('documents', category=d.category) }}" class="block py-1.5 text-sm" style="border-bottom:1px solid var(--border);">
+        {{ d.name }} <span style="color:var(--muted)">· {{ d.category }}</span>
+      </a>
+      {% endfor %}
+    </div>
+    {% endif %}
+  {% else %}
+    <p class="text-sm text-center py-8" style="color:var(--muted)">Tapez votre recherche ci-dessus.</p>
+  {% endif %}
+</div>
+{% endblock %}

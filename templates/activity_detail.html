@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+{% set active_nav = "activities" %}
+{% block content %}
+<div class="card">
+  <div class="flex justify-between items-start mb-2">
+    <h2 class="font-bold text-base">{{ a.title }}</h2>
+    <span class="badge {{ 'badge-primary' if a.status=='prévue' else ('badge-warning' if a.status=='en cours' else ('badge-success' if a.status=='réalisée' else 'badge-danger')) }}">{{ a.status }}</span>
+  </div>
+  {% if a.is_demo %}<span class="badge badge-warning mb-2">Démo</span>{% endif %}
+  <p class="text-sm">{{ a.description }}</p>
+  <div class="text-xs mt-3 space-y-1" style="color:var(--muted)">
+    <div>{{ a.date.strftime('%d %b %Y') }} à {{ a.time or '—' }}</div>
+    <div>{{ a.location or '—' }}</div>
+    <div>Responsable : {{ a.responsable or '—' }}</div>
+  </div>
+  <div class="mt-3">
+    <div class="text-xs font-semibold mb-1" style="color:var(--muted)">PARTICIPANTS ({{ a.participants|length }})</div>
+    {% if not a.participants %}
+      <p class="text-xs" style="color:var(--muted)">Aucun participant enregistré.</p>
+    {% else %}
+      <div class="flex flex-wrap gap-1">
+        {% for m in a.participants %}
+          <span class="badge badge-primary">{{ m.first_name }} {{ m.last_name }}</span>
+        {% endfor %}
+      </div>
+    {% endif %}
+  </div>
+  {% if a.report %}
+  <div class="mt-3">
+    <div class="text-xs font-semibold mb-1" style="color:var(--muted)">COMPTE RENDU</div>
+    <p class="text-sm">{{ a.report }}</p>
+  </div>
+  {% endif %}
+  {% if perms.manage_activities %}
+  <a href="{{ url_for('activity_edit', aid=a.id) }}" class="btn btn-ghost w-full mt-4">Modifier</a>
+  {% endif %}
+</div>
+{% endblock %}

@@ -1,0 +1,62 @@
+{% extends "base.html" %}
+{% set active_nav = "activities" %}
+{% block content %}
+<div class="card">
+  <h2 class="font-bold text-base mb-4">{{ 'Modifier l\'activité' if activity else 'Nouvelle activité' }}</h2>
+  <form method="POST" class="space-y-3">
+    <label class="block">
+      <span class="block text-xs font-semibold mb-1" style="color:var(--muted)">Titre</span>
+      <input name="title" required value="{{ activity.title if activity else '' }}">
+    </label>
+    <label class="block">
+      <span class="block text-xs font-semibold mb-1" style="color:var(--muted)">Description</span>
+      <textarea name="description" rows="3">{{ activity.description if activity else '' }}</textarea>
+    </label>
+    <div class="grid grid-cols-2 gap-2">
+      <label class="block">
+        <span class="block text-xs font-semibold mb-1" style="color:var(--muted)">Date</span>
+        <input type="date" name="date" required value="{{ activity.date.isoformat() if activity else '' }}">
+      </label>
+      <label class="block">
+        <span class="block text-xs font-semibold mb-1" style="color:var(--muted)">Heure</span>
+        <input type="time" name="time" value="{{ activity.time if activity else '09:00' }}">
+      </label>
+    </div>
+    <label class="block">
+      <span class="block text-xs font-semibold mb-1" style="color:var(--muted)">Lieu</span>
+      <input name="location" value="{{ activity.location if activity else '' }}">
+    </label>
+    <label class="block">
+      <span class="block text-xs font-semibold mb-1" style="color:var(--muted)">Responsable</span>
+      <input name="responsable" value="{{ activity.responsable if activity else current_user.name }}">
+    </label>
+    <label class="block">
+      <span class="block text-xs font-semibold mb-1" style="color:var(--muted)">Statut</span>
+      <select name="status">
+        {% for s in ['prévue','en cours','réalisée','annulée'] %}
+          <option value="{{ s }}" {% if activity and activity.status == s %}selected{% endif %}>{{ s|capitalize }}</option>
+        {% endfor %}
+      </select>
+    </label>
+    <div>
+      <span class="block text-xs font-semibold mb-1" style="color:var(--muted)">Participants</span>
+      <div class="flex flex-wrap gap-1.5">
+        {% set participant_ids = activity.participants|map(attribute='id')|list if activity else [] %}
+        {% for m in members %}
+        <label class="px-2.5 py-1 rounded-full text-xs cursor-pointer"
+               style="border:1px solid var(--border); background: {{ 'var(--primary)' if m.id in participant_ids else 'var(--bg)' }}; color: {{ '#fff' if m.id in participant_ids else 'var(--ink)' }};">
+          <input type="checkbox" name="participants" value="{{ m.id }}" class="hidden" {% if m.id in participant_ids %}checked{% endif %}
+                 onclick="this.parentElement.style.background = this.checked ? '#146356' : '#F6F4EE'; this.parentElement.style.color = this.checked ? '#fff' : '#20302C';">
+          {{ m.first_name }} {{ m.last_name }}
+        </label>
+        {% endfor %}
+      </div>
+    </div>
+    <label class="block">
+      <span class="block text-xs font-semibold mb-1" style="color:var(--muted)">Compte rendu</span>
+      <textarea name="report" rows="3">{{ activity.report if activity else '' }}</textarea>
+    </label>
+    <button type="submit" class="btn btn-primary w-full">Enregistrer</button>
+  </form>
+</div>
+{% endblock %}

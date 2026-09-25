@@ -1,0 +1,81 @@
+{% extends "base.html" %}
+{% set active_nav = "documents" %}
+{% block content %}
+<div class="space-y-3">
+  <div class="flex gap-2 overflow-x-auto">
+    <a href="{{ url_for('documents') }}" class="px-3 py-1.5 rounded-full text-xs font-medium flex-shrink-0"
+       style="background: {{ 'var(--primary)' if cat_filter=='Toutes' else '#fff' }}; color: {{ '#fff' if cat_filter=='Toutes' else 'var(--muted)' }}; border:1px solid var(--border);">Toutes</a>
+    {% for c in categories %}
+    <a href="{{ url_for('documents', category=c) }}" class="px-3 py-1.5 rounded-full text-xs font-medium flex-shrink-0"
+       style="background: {{ 'var(--primary)' if cat_filter==c else '#fff' }}; color: {{ '#fff' if cat_filter==c else 'var(--muted)' }}; border:1px solid var(--border);">{{ c }}</a>
+    {% endfor %}
+  </div>
+
+  {% if perms.manage_documents %}
+  <button onclick="document.getElementById('addModal').classList.remove('hidden'); document.getElementById('addModal').classList.add('flex');"
+    class="btn btn-primary w-full">+ Ajouter un document</button>
+  {% endif %}
+
+  {% if not documents %}
+    <p class="text-sm text-center py-8" style="color:var(--muted)">Aucun document dans cette catégorie.</p>
+  {% else %}
+    <div class="space-y-2">
+      {% for d in documents %}
+      <div class="card !p-3 flex justify-between items-start gap-2">
+        <div class="min-w-0">
+          <div class="text-sm font-semibold flex items-center gap-1.5">{{ d.name }} {% if d.is_demo %}<span class="badge badge-warning">Démo</span>{% endif %}</div>
+          <div class="text-xs mt-0.5" style="color:var(--muted)">{{ d.category }} · {{ d.date_added.strftime('%d %b %Y') }}</div>
+          {% if d.note %}<p class="text-xs mt-1">{{ d.note }}</p>{% endif %}
+          {% if d.filename or d.drive_file_id %}
+          <div class="text-xs mt-1" style="color:var(--muted)">📎 {{ d.original_name }}{% if d.file_size %} ({{ d.file_size|file_size }}){% endif %}{% if d.drive_file_id %} · Google Drive{% endif %}</div>
+          {% endif %}
+        </div>
+        <div class="flex flex-col gap-1 items-end flex-shrink-0">
+          {% if d.filename or d.drive_file_id %}
+          <a href="{{ url_for('document_download', did=d.id) }}" class="text-xs font-semibold" style="color:var(--primary)">Télécharger</a>
+          {% endif %}
+          {% if perms.manage_documents %}
+          <form method="POST" action="{{ url_for('document_delete', did=d.id) }}">
+            <button type="submit" class="text-xs" style="color:var(--danger)">Suppr.</button>
+          </form>
+          {% endif %}
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  {% endif %}
+</div>
+
+{% if perms.manage_documents %}
+<div id="addModal" class="fixed inset-0 z-50 hidden items-center justify-center" style="background:rgba(20,25,23,0.45);">
+  <div class="bg-white rounded-2xl p-5 w-full max-w-sm mx-4">
+    <h3 class="font-bold mb-3">Nouveau document</h3>
+    <form method="POST" action="{{ url_for('document_add') }}" enctype="multipart/form-data" class="space-y-3">
+      <label class="block">
+        <span class="block text-xs font-semibold mb-1" style="color:var(--muted)">Nom du document</span>
+        <input name="name" required>
+      </label>
+      <label class="block">
+        <span class="block text-xs font-semibold mb-1" style="color:var(--muted)">Catégorie</span>
+        <select name="category">
+          {% for c in categories %}<option value="{{ c }}">{{ c }}</option>{% endfor %}
+        </select>
+      </label>
+      <label class="block">
+        <span class="block text-xs font-semibold mb-1" style="color:var(--muted)">Fichier (PDF, photo, etc. — 20 Mo max, optionnel)</span>
+        <input type="file" name="file">
+      </label>
+      <label class="block">
+        <span class="block text-xs font-semibold mb-1" style="color:var(--muted)">Note / référence</span>
+        <textarea name="note" rows="2" placeholder="Ex : description, contexte…"></textarea>
+      </label>
+      <div class="flex gap-2">
+        <button type="submit" class="btn btn-primary flex-1">Enregistrer</button>
+        <button type="button" onclick="document.getElementById('addModal').classList.add('hidden'); document.getElementById('addModal').classList.remove('flex');" class="btn btn-ghost flex-1">Annuler</button>
+      </div>
+    </form>
+  </div>
+</div>
+{% endif %}
+{% endblock %}
+

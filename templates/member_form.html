@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+{% set active_nav = "members" %}
+{% block content %}
+<div class="card">
+  <h2 class="font-bold text-base mb-4">{{ 'Modifier le membre' if member else 'Nouveau membre' }}</h2>
+  <form method="POST" class="space-y-3">
+    <label class="block">
+      <span class="block text-xs font-semibold mb-1" style="color:var(--muted)">Prénom</span>
+      <input name="first_name" required value="{{ member.first_name if member else '' }}">
+    </label>
+    <label class="block">
+      <span class="block text-xs font-semibold mb-1" style="color:var(--muted)">Nom</span>
+      <input name="last_name" required value="{{ member.last_name if member else '' }}">
+    </label>
+    <label class="block">
+      <span class="block text-xs font-semibold mb-1" style="color:var(--muted)">Téléphone</span>
+      <input name="phone" value="{{ member.phone if member else '' }}">
+    </label>
+    <label class="block">
+      <span class="block text-xs font-semibold mb-1" style="color:var(--muted)">Adresse</span>
+      <input name="address" value="{{ member.address if member else '' }}">
+    </label>
+    <label class="block">
+      <span class="block text-xs font-semibold mb-1" style="color:var(--muted)">Fonction</span>
+      <select name="fonction">
+        {% for r in roles %}
+          <option value="{{ r }}" {% if member and member.fonction == r %}selected{% endif %}>{{ r }}</option>
+        {% endfor %}
+      </select>
+    </label>
+    <label class="block">
+      <span class="block text-xs font-semibold mb-1" style="color:var(--muted)">N° membre</span>
+      <input name="member_code" value="{{ member.member_code if member else '' }}">
+    </label>
+    <label class="block">
+      <span class="block text-xs font-semibold mb-1" style="color:var(--muted)">Date d'adhésion</span>
+      <input type="date" name="join_date" value="{{ member.join_date.isoformat() if member else '' }}" required>
+    </label>
+    <label class="block">
+      <span class="block text-xs font-semibold mb-1" style="color:var(--muted)">
+        {{ 'Nouveau mot de passe (laisser vide pour ne pas changer)' if member else 'Mot de passe (au moins 4 caractères)' }}
+      </span>
+      <input type="password" name="password" {% if not member %}required{% endif %} minlength="4">
+    </label>
+    <label class="block">
+      <span class="block text-xs font-semibold mb-1" style="color:var(--muted)">Observations</span>
+      <textarea name="notes" rows="3">{{ member.notes if member else '' }}</textarea>
+    </label>
+    <button type="submit" class="btn btn-primary w-full">Enregistrer</button>
+  </form>
+</div>
+{% endblock %}

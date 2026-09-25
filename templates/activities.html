@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+{% set active_nav = "activities" %}
+{% block content %}
+<div class="space-y-3">
+  <div class="flex items-center justify-between gap-2">
+    <div class="flex gap-2 overflow-x-auto">
+      {% for s, label in [('tous','Toutes'), ('prévue','Prévue'), ('en cours','En cours'), ('réalisée','Réalisée'), ('annulée','Annulée')] %}
+      <a href="{{ url_for('activities', status=s) }}" class="px-3 py-1.5 rounded-full text-xs font-medium flex-shrink-0"
+         style="background: {{ 'var(--primary)' if status_filter==s else '#fff' }}; color: {{ '#fff' if status_filter==s else 'var(--muted)' }}; border:1px solid var(--border);">
+        {{ label }}
+      </a>
+      {% endfor %}
+    </div>
+    {% if perms.manage_activities %}
+    <a href="{{ url_for('activity_new') }}" class="rounded-xl px-3 py-1.5 flex-shrink-0" style="background:var(--primary); color:#fff;">+</a>
+    {% endif %}
+  </div>
+
+  {% if not activities %}
+    <p class="text-sm text-center py-8" style="color:var(--muted)">Aucune activité.</p>
+  {% else %}
+    <div class="space-y-2">
+      {% for a in activities %}
+      <a href="{{ url_for('activity_detail', aid=a.id) }}" class="card !p-3 block">
+        <div class="flex justify-between items-start">
+          <div class="text-sm font-semibold flex items-center gap-1.5">{{ a.title }} {% if a.is_demo %}<span class="badge badge-warning">Démo</span>{% endif %}</div>
+          <span class="badge {{ 'badge-primary' if a.status=='prévue' else ('badge-warning' if a.status=='en cours' else ('badge-success' if a.status=='réalisée' else 'badge-danger')) }}">{{ a.status }}</span>
+        </div>
+        <div class="text-xs mt-1" style="color:var(--muted)">{{ a.date.strftime('%d %b %Y') }} · {{ a.time or '' }} · {{ a.location or '' }}</div>
+      </a>
+      {% endfor %}
+    </div>
+  {% endif %}
+</div>
+{% endblock %}
