@@ -1,0 +1,8 @@
+__pycache__/
+*.pyc
+.venv/
+venv/
+arppsd.db
+.env
+instance/
+uploads/
