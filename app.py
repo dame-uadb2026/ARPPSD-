@@ -247,14 +247,6 @@ def run_diagnostics():
     issues = []
     on_render = os.environ.get("RENDER") is not None
 
-    if on_render and not db.DB_PATH.startswith("/var/data") and not gdrive.is_configured():
-        issues.append(dict(
-            title="Base de données non persistante",
-            detail="Sans disque persistant, la base de données sera effacée à chaque "
-                   "redéploiement. Ajoutez un disque Render monté sur /var/data, ou "
-                   "configurez GOOGLE_SERVICE_ACCOUNT_JSON et GOOGLE_DRIVE_FOLDER_ID "
-                   "pour une sauvegarde automatique gratuite sur Google Drive.",
-        ))
     if on_render and not UPLOAD_FOLDER.startswith("/var/data") and not gdrive.is_configured():
         issues.append(dict(
             title="Documents non persistants",
